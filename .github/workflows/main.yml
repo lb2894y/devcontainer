@@ -8,7 +8,15 @@ jobs:
     permissions:
       contents: read
       packages: write
+    env:
+      IMAGE_REGISTRY: ghcr.io/${{ github.repository_owner }}
     steps:
+    - name: Log in to ghcr.io
+      uses: redhat-actions/podman-login@v1
+      with:
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+        registry: ${{ env.IMAGE_REGISTRY }}
     - uses: actions/checkout@v4
     - name: Buildah Action
       id: build_image
@@ -17,6 +25,11 @@ jobs:
         image: devcontainer
         tags: latest ${{ github.sha }}
         oci: true
+        extra-args: |
+          --cache-from
+          ${{ env.IMAGE_REGISTRY }}
+          --cache-to
+          ${{ env.IMAGE_REGISTRY }}
         containerfiles: |
           ./Dockerfile
     - name: Push To GHCR
@@ -24,6 +37,6 @@ jobs:
       with:
         image: ${{ steps.build_image.outputs.image }}
         tags: ${{ steps.build_image.outputs.tags }}
-        registry: ghcr.io/${{ github.repository_owner }}
-        username: ${{ github.actor }}
-        password: ${{ github.token }}
+        registry: ${{ env.IMAGE_REGISTRY }}
+        # username: ${{ github.actor }}
+        # password: ${{ github.token }}
