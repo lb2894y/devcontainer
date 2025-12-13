@@ -1,8 +1,8 @@
 on:
-- push
-- workflow_dispatch
-- schedule:
-  - cron: '* 0 * * *'
+  push:
+  workflow_dispatch:
+  schedule:
+  - cron: '0 0 * * *'
 jobs:
   build:
     name: Build image
